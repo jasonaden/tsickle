@@ -57,7 +57,7 @@ const ConstEnum: DontTypeCheckMe = {
   EMITTED_ENUM_VALUE: 0,};
 export {ConstEnum};
 
-let /** @type {ConstEnum} */ constEnumValue = ConstEnum.EMITTED_ENUM_VALUE;
+let /** @type {number} */ constEnumValue = ConstEnum.EMITTED_ENUM_VALUE;
 /**
  * @record
  */
@@ -65,9 +65,9 @@ export function InterfaceUsingConstEnum() {}
 
 
 function InterfaceUsingConstEnum_tsickle_Closure_declarations() {
-/** @type {ConstEnum} */
+/** @type {number} */
 InterfaceUsingConstEnum.prototype.field;
-/** @type {ConstEnum} */
+/** @type {number} */
 InterfaceUsingConstEnum.prototype.field2;
 }
 
@@ -77,10 +77,17 @@ export interface InterfaceUsingConstEnum {
   // Error: Error at test_files/enum/enum.ts:75:11: Property 'field2' of exported interface has or is using private name 'ConstEnum'.
   field2: ConstEnum.EMITTED_ENUM_VALUE;
 }
-/** @enum {number} */
+/** @enum {?} */
 const EnumWithNonConstValues: DontTypeCheckMe = {
   Scheme:  (x => x + 1)(3),
   UserInfoRenamed: 2,};
 EnumWithNonConstValues[EnumWithNonConstValues.Scheme] = "Scheme";
 EnumWithNonConstValues[EnumWithNonConstValues.UserInfoRenamed] = "UserInfoRenamed";
+
+/** @enum {string} */
+const StringEnum: DontTypeCheckMe = {
+  STR:  'abc',
+  OTHER_STR:  'xyz',};
+StringEnum[StringEnum.STR] = "STR";
+StringEnum[StringEnum.OTHER_STR] = "OTHER_STR";
 

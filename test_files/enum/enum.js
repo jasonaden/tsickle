@@ -47,22 +47,29 @@ const ConstEnum = {
     EMITTED_ENUM_VALUE: 0,
 };
 exports.ConstEnum = ConstEnum;
-let /** @type {ConstEnum} */ constEnumValue = ConstEnum.EMITTED_ENUM_VALUE;
+let /** @type {number} */ constEnumValue = ConstEnum.EMITTED_ENUM_VALUE;
 /**
  * @record
  */
 function InterfaceUsingConstEnum() { }
 exports.InterfaceUsingConstEnum = InterfaceUsingConstEnum;
 function InterfaceUsingConstEnum_tsickle_Closure_declarations() {
-    /** @type {ConstEnum} */
+    /** @type {number} */
     InterfaceUsingConstEnum.prototype.field;
-    /** @type {ConstEnum} */
+    /** @type {number} */
     InterfaceUsingConstEnum.prototype.field2;
 }
-/** @enum {number} */
+/** @enum {?} */
 const EnumWithNonConstValues = {
     Scheme: (x => x + 1)(3),
     UserInfoRenamed: 2,
 };
 EnumWithNonConstValues[EnumWithNonConstValues.Scheme] = "Scheme";
 EnumWithNonConstValues[EnumWithNonConstValues.UserInfoRenamed] = "UserInfoRenamed";
+/** @enum {string} */
+const StringEnum = {
+    STR: 'abc',
+    OTHER_STR: 'xyz',
+};
+StringEnum[StringEnum.STR] = "STR";
+StringEnum[StringEnum.OTHER_STR] = "OTHER_STR";

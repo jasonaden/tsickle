@@ -12,11 +12,11 @@ export function EnumUsingIf() {}
 
 
 function EnumUsingIf_tsickle_Closure_declarations() {
-/** @type {tsickle_forward_declare_1.ConstEnum} */
+/** @type {number} */
 EnumUsingIf.prototype.field;
 }
 
 
 export interface EnumUsingIf { field: ConstEnum; }
 
-const /** @type {tsickle_forward_declare_1.ConstEnum} */ fieldUsingConstEnum = ConstEnum.EMITTED_ENUM_VALUE;
+const /** @type {number} */ fieldUsingConstEnum = ConstEnum.EMITTED_ENUM_VALUE;

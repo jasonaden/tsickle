@@ -14,8 +14,8 @@ Index: ./test_files/enum/enum_user.js
   */
 @@ -13,5 +12,5 @@
  function EnumUsingIf_tsickle_Closure_declarations() {
-     /** @type {tsickle_forward_declare_1.ConstEnum} */
+     /** @type {number} */
      EnumUsingIf.prototype.field;
  }
--const /** @type {tsickle_forward_declare_1.ConstEnum} */ fieldUsingConstEnum = enum_1.ConstEnum.EMITTED_ENUM_VALUE;
-+const /** @type {tsickle_forward_declare_1.ConstEnum} */ fieldUsingConstEnum = 0 /* EMITTED_ENUM_VALUE */;
+-const /** @type {number} */ fieldUsingConstEnum = enum_1.ConstEnum.EMITTED_ENUM_VALUE;
++const /** @type {number} */ fieldUsingConstEnum = 0 /* EMITTED_ENUM_VALUE */;

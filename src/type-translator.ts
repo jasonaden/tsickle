@@ -61,6 +61,7 @@ export function typeToDebugString(type: ts.Type): string {
       ts.ObjectFlags.Instantiated,
       ts.ObjectFlags.ObjectLiteral,
       ts.ObjectFlags.EvolvingArray,
+      ts.ObjectFlags.ObjectLiteralPatternWithComputedProperties,
     ];
     for (const flag of objectFlags) {
       if ((objType.objectFlags & flag) !== 0) {
@@ -232,7 +233,7 @@ export class TypeTranslator {
         return;
       },
       reportInaccessibleThisError: doNothing,
-      reportIllegalExtends: doNothing,
+      reportPrivateInBaseOfClassExpression: doNothing,
     };
     builder.buildSymbolDisplay(sym, writer, this.node);
     return this.stripClutzNamespace(str);
@@ -306,15 +307,6 @@ export class TypeTranslator {
           return '?';
         }
         return this.symbolToString(type.symbol, true);
-      case ts.TypeFlags.EnumLiteral:
-        const enumLiteralBaseType = (type as ts.EnumLiteralType).baseType;
-        if (!enumLiteralBaseType.symbol) {
-          this.warn(`EnumLiteralType without a symbol`);
-          return '?';
-        }
-        // Closure Compiler doesn't support literals in types, so this code must not emit
-        // "EnumType.MEMBER", but rather "EnumType". The values are de-duplicated in translateUnion.
-        return this.symbolToString(enumLiteralBaseType.symbol, true);
       case ts.TypeFlags.ESSymbol:
         // NOTE: currently this is just a typedef for {?}, shrug.
         // https://github.com/google/closure-compiler/blob/55cf43ee31e80d89d7087af65b5542aa63987874/externs/es3.js#L34
@@ -358,6 +350,34 @@ export class TypeTranslator {
         // things (true|false|number) and ts.TypeFlags.Boolean doesn't show up at all.
         if (type.flags & ts.TypeFlags.Union) {
           return this.translateUnion(type as ts.UnionType);
+        }
+
+        // Enum literals are represented as
+        //   ts.TypeFlags.NumberLiteral | ts.TypeFlags.EnumLiteral
+        //   ts.TypeFlags.StringLiteral | ts.TypeFlags.EnumLiteral
+        if (type.flags & ts.TypeFlags.EnumLiteral) {
+          const enumLiteralBaseType = this.typeChecker.getBaseTypeOfLiteralType(type);
+          if (!enumLiteralBaseType.symbol) {
+            this.warn(`EnumLiteralType without a symbol`);
+            return '?';
+          }
+
+          if (enumLiteralBaseType === type) {
+            // For const enums, the type and base type are the same.
+            if (type.flags & ts.TypeFlags.NumberLiteral) {
+              return 'number';
+            } else if (type.flags & ts.TypeFlags.StringLiteral) {
+              return 'string';
+            } else {
+              this.warn(`const enum with strange type`);
+              return '?';
+            }
+          } else {
+            // Closure Compiler doesn't support literals in types, so this code must not emit
+            // "EnumType.MEMBER", but rather "EnumType". The values are de-duplicated in
+            // translateUnion.
+            return this.symbolToString(enumLiteralBaseType.symbol, true);
+          }
         }
 
         // The switch statement should have been exhaustive.

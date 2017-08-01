@@ -11,7 +11,7 @@ const tsickle_forward_declare_1 = goog.forwardDeclare("test_files.enum.enum");
 function EnumUsingIf() { }
 exports.EnumUsingIf = EnumUsingIf;
 function EnumUsingIf_tsickle_Closure_declarations() {
-    /** @type {tsickle_forward_declare_1.ConstEnum} */
+    /** @type {number} */
     EnumUsingIf.prototype.field;
 }
-const /** @type {tsickle_forward_declare_1.ConstEnum} */ fieldUsingConstEnum = enum_1.ConstEnum.EMITTED_ENUM_VALUE;
+const /** @type {number} */ fieldUsingConstEnum = enum_1.ConstEnum.EMITTED_ENUM_VALUE;

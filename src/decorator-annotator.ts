@@ -123,7 +123,7 @@ export class DecoratorClassVisitor {
   /**
    * gatherMethod grabs the decorators off a class method and emits nothing.
    */
-  private gatherMethodOrProperty(method: ts.Declaration) {
+  private gatherMethodOrProperty(method: ts.NamedDeclaration) {
     if (!method.decorators) return;
     if (!method.name || method.name.kind !== ts.SyntaxKind.Identifier) {
       // Method has a weird name, e.g.
@@ -149,10 +149,11 @@ export class DecoratorClassVisitor {
    * the type is defined and returns that identifier instead.
    */
   private getValueIdentifierForType(typeSymbol: ts.Symbol): ts.Identifier|null {
-    if (!typeSymbol.valueDeclaration) {
+    const valueDeclaration = typeSymbol.valueDeclaration as ts.NamedDeclaration;
+    if (!valueDeclaration) {
       return null;
     }
-    const valueName = typeSymbol.valueDeclaration.name;
+    const valueName = valueDeclaration.name;
     if (!valueName || valueName.kind !== ts.SyntaxKind.Identifier) {
       return null;
     }
@@ -266,7 +267,7 @@ export class DecoratorClassVisitor {
           // rewriting. Note that we cannot use param.type as the emit node directly (not even just
           // for mapping), because that is marked as a type use of the node, not a value use, so it
           // doesn't get updated as an export.
-          const sym = this.typeChecker.getTypeAtLocation(param.type).getSymbol();
+          const sym = this.typeChecker.getTypeAtLocation(param.type).getSymbol()!;
           const emitNode = this.getValueIdentifierForType(sym);
           if (emitNode) {
             this.rewriter.writeRange(emitNode, emitNode.getStart(), emitNode.getEnd());

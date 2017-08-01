@@ -30,8 +30,8 @@ Index: ./test_files/enum/enum.js
      EMITTED_ENUM_VALUE: 0,
  };
  exports.ConstEnum = ConstEnum;
--let /** @type {ConstEnum} */ constEnumValue = ConstEnum.EMITTED_ENUM_VALUE;
-+let /** @type {ConstEnum} */ constEnumValue = 0 /* EMITTED_ENUM_VALUE */;
+-let /** @type {number} */ constEnumValue = ConstEnum.EMITTED_ENUM_VALUE;
++let /** @type {number} */ constEnumValue = 0 /* EMITTED_ENUM_VALUE */;
  /**
   * @record
   */

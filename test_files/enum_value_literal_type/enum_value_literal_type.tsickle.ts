@@ -10,4 +10,4 @@ const ExportedEnum: DontTypeCheckMe = {
 export {ExportedEnum};
 ExportedEnum[ExportedEnum.VALUE] = "VALUE";
 
-export const /** @type {ExportedEnum} */ x: ExportedEnum.VALUE = ExportedEnum.VALUE;
+export const /** @type {number} */ x: ExportedEnum.VALUE = ExportedEnum.VALUE;

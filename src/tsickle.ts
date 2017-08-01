@@ -595,7 +595,7 @@ class Annotator extends ClosureRewriter {
       case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.ClassDeclaration:
       case ts.SyntaxKind.ModuleDeclaration:
-        const decl = node as ts.Declaration;
+        const decl = node as ts.NamedDeclaration;
         if (!decl.name || decl.name.kind !== ts.SyntaxKind.Identifier) {
           break;
         }
@@ -867,7 +867,8 @@ class Annotator extends ClosureRewriter {
         // If it has a symbol, it's actually a regular declared property.
         if (!quotedPropSym) return false;
         const declarationHasQuotes =
-            !quotedPropSym.declarations || quotedPropSym.declarations.some(decl => {
+            !quotedPropSym.declarations || quotedPropSym.declarations.some(d => {
+              const decl = d as ts.NamedDeclaration;
               if (!decl.name) return false;
               return decl.name.kind === ts.SyntaxKind.StringLiteral;
             });
@@ -1200,15 +1201,16 @@ class Annotator extends ClosureRewriter {
       names.push(...namedImports.elements.map(e => e.name));
     }
     for (const name of names) {
-      let symbol = this.typeChecker.getSymbolAtLocation(name);
+      let symbol = this.mustGetSymbolAtLocation(name);
       if (symbol.flags & ts.SymbolFlags.Alias) {
         symbol = this.typeChecker.getAliasedSymbol(symbol);
       }
       const declarationNames: ts.Identifier[] = [];
       if (symbol.declarations) {
         for (const d of symbol.declarations) {
-          if (d.name && d.name.kind === ts.SyntaxKind.Identifier) {
-            declarationNames.push(d.name as ts.Identifier);
+          const decl = d as ts.NamedDeclaration;
+          if (decl.name && decl.name.kind === ts.SyntaxKind.Identifier) {
+            declarationNames.push(decl.name as ts.Identifier);
           }
         }
       }
@@ -1412,7 +1414,7 @@ class Annotator extends ClosureRewriter {
     this.emit(`}\n`);
   }
 
-  private propertyName(prop: ts.Declaration): string|null {
+  private propertyName(prop: ts.NamedDeclaration): string|null {
     if (!prop.name) return null;
 
     switch (prop.name.kind) {
@@ -1500,7 +1502,27 @@ class Annotator extends ClosureRewriter {
     this.emit('\n');
     const name = node.name.getText();
 
-    this.emit(`/** @enum {number} */\n`);
+    // Figure out whether this is a string or number enum, by iterating through the enum
+    // members.  Note that TS allows mixed string/number enums also; just translate as {?}.
+    let enumType: string|undefined;
+    for (const member of node.members) {
+      let memberType = 'number';
+      if (member.initializer) {
+        memberType = typeof this.typeChecker.getConstantValue(member);
+      }
+
+      if (enumType === undefined) {
+        enumType = memberType;
+      } else {
+        if (enumType !== memberType) {
+          enumType = '?';
+          break;
+        }
+      }
+    }
+    if (!enumType || enumType === 'undefined') enumType = '?';
+
+    this.emit(`/** @enum {${enumType}} */\n`);
     this.emit(`const ${name}: DontTypeCheckMe = {`);
     // Emit enum values ('BAR: 0,').
     let enumIndex = 0;
@@ -1512,13 +1534,11 @@ class Annotator extends ClosureRewriter {
 
       if (member.initializer) {
         const enumConstValue = this.typeChecker.getConstantValue(member);
-        if (enumConstValue !== undefined) {
-          this.emit(enumConstValue.toString());
-          // TODO(martinprobst): In TypeScript 2.4, check enumConstValue is not a string.
+        if (typeof enumConstValue === 'number') {
           enumIndex = enumConstValue + 1;
+          this.emit(enumConstValue.toString());
         } else {
-          // Non-constant enum value.  Save the initializer expression for
-          // emitting as-is.
+          // Non-constant enum value.  Emit this initializer expression as-is.
           // Note: if the member's initializer expression refers to another
           // value within the enum (e.g. something like
           //   enum Foo {
@@ -1526,13 +1546,13 @@ class Annotator extends ClosureRewriter {
           //     Field2 = Field1 + something(),
           //   }
           // Then when we emit the initializer we produce invalid code because
-          // on the Closure side it has to be written "Foo.Field1 + something()".
+          // on the Closure side the reference to Field1 has to be namespaced,
+          // e.g. written "Foo.Field1 + something()".
           // Hopefully this doesn't come up often -- if the enum instead has
           // something like
           //     Field2 = Field1 + 3,
           // then it's still a constant expression and we inline the constant
           // value in the above branch of this "if" statement.
-          // members.set(memberName, member.initializer);
           this.visit(member.initializer);
         }
       } else {
